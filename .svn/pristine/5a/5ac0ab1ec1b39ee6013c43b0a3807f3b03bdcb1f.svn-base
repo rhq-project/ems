@@ -1,0 +1,289 @@
+<?xml version="1.0"?>
+
+<!--
+
+ Author: Greg Hinkle
+
+
+ Copyright 2002-2011 Greg Hinkle
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+
+
+ http://sourceforge.net/projects/mc4j
+
+-->
+
+<project name="mc4j-ems" basedir="." default="compile">
+
+
+    <property name="module.jar" value="org-mc4j-ems.jar"/>
+
+    <property name="release.version" value="1.3"/>
+
+
+    <target name="init" description="Initializes the MC4J-EMS build system.">
+
+        <echo message="MC4J-EMS Build Environment - Try [ant -projecthelp] for more info."/>
+
+        <tstamp/>
+
+        <!-- Make sure we have all the directories we need to run a build. -->
+        <mkdir dir="classes"/>
+
+        <path id="classpath.compile">
+            <fileset dir="lib/build">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="lib">
+                <include name="*.jar"/>
+            </fileset>
+
+        </path>
+
+
+        <available
+                property="jre15Available"
+                classname="java.lang.management.MemoryUsage"
+                classpathref="classpath.compile"/>
+
+        <!-- Check that the required dependencies are installed. -->
+        <available
+                classpathref="classpath.compile"
+                classname="org.openide.DialogDisplayer"
+                property="installed.netbeans"/>
+
+
+        <fail unless="jre15Available" message="JDK 1.5 or later is required to compile EMS."/>
+        <property name="compile.target" value="1.5"/>
+        <property name="compile.source" value="1.5"/>
+
+<!--
+        <condition property="compile.target" value="jsr14">
+            <isset property="jre15Available"/>
+        </condition>
+        <condition property="compile.target" value="1.4">
+            <not>
+                <isset property="jre15Available"/>
+            </not>
+        </condition>
+
+        <condition property="compile.source" value="1.4">
+            <not>
+                <isset property="jre15Available"/>
+            </not>
+        </condition>
+        <condition property="compile.source" value="1.5">
+            <isset property="jre15Available"/>
+        </condition>
+-->
+        <echo message="Will compile with target [${compile.target}] and source [${compile.source}]"/>
+
+    </target>
+
+    
+    <target name="clean" description="Clean">
+        <delete dir="classes"/>
+        <delete dir="javadocs"/>
+    </target>
+
+    
+    <target name="compile" depends="init" description="Compiles the MC4J-EMS codebase.">
+        <mkdir dir="classes"/>
+        <mkdir dir="classes/main"/>
+        <mkdir dir="classes/impl"/>
+        <mkdir dir="classes/test"/>
+        <javac srcdir="src/ems" destdir="classes/main" debug="true" source="${compile.source}"
+               target="${compile.target}">
+            <classpath>
+                <path refid="classpath.compile"/>
+            </classpath>
+            <exclude name="**/DeepClassLoaderOrig*"/>
+        </javac>
+        <javac srcdir="src/ems-impl" destdir="classes/impl" debug="true" source="${compile.source}"
+               target="${compile.target}">
+            <classpath>
+                <path refid="classpath.compile"/>
+                <pathelement location="classes/main"/>
+            </classpath>
+        </javac>
+        <javac srcdir="src/test" destdir="classes/test" debug="true" source="${compile.source}" target="1.5">
+            <classpath>
+                <path refid="classpath.compile"/>
+                <pathelement location="classes/main"/>
+            </classpath>
+        </javac>
+
+    </target>
+
+
+    <target name="javadoc" depends="init" description="Generated Javadocs for MC4J-EMS classes.">        
+        <mkdir dir="javadocs/api"/>               
+        <mkdir dir="javadocs/impl"/>               
+        <javadoc packagenames="org.mc4j.ems.*"
+                 excludepackagenames="org.mc4j.ems.connection.support.classloader.*"
+                 sourcepath="src/ems"           
+                 destdir="javadocs/api"
+                 author="true"
+                 version="true"
+                 use="true"
+                 windowtitle="EMS API">
+        </javadoc>
+        <javadoc packagenames="org.mc4j.ems.*"                 
+                 sourcepath="src/ems-impl"           
+                 destdir="javadocs/impl"
+                 author="true"
+                 version="true"
+                 use="true"
+                 windowtitle="EMS Impl">
+        </javadoc>        
+    </target>
+
+    
+    <target name="jars" depends="compile, javadoc" description="Builds the MC4J Module JAR Files">
+        <mkdir dir="dist"/>
+        <mkdir dir="build"/>
+        <delete>
+            <fileset dir="dist">
+                <include name="*.jar"/>
+            </fileset>
+        </delete>
+
+        <jar jarfile="classes/main/org-mc4j-ems-impl.jar" update="true" compress="false">
+            <fileset dir="classes/impl" includes="org/mc4j/ems/impl/**"/>
+            <manifest>
+                <attribute name="Implementation-Title" value="MC4J-EMS"/>
+                <attribute name="Specification-Version" value="${release.version}"/>
+                <attribute name="Implementation-Version" value="${release.version}"/>
+                <attribute name="Implementation-URL" value="http://mc4j.org/"/>
+            </manifest>
+        </jar>        
+        <copy file="classes/main/org-mc4j-ems-impl.jar" 
+              tofile="dist/org-mc4j-ems-impl-${release.version}.jar"/>
+        
+        <jar jarfile="dist/org-mc4j-ems-${release.version}.jar" update="true" compress="false">
+            <fileset dir="classes/main"/>
+            <fileset dir="${basedir}" includes="lib/*.jar"/>
+            <fileset dir="${basedir}" includes="lib/jsr160-includes/*.jar"/>
+
+            <manifest>
+                <attribute name="Implementation-Title" value="MC4J-EMS"/>
+                <attribute name="Specification-Version" value="${release.version}"/>
+                <attribute name="Implementation-Version" value="${release.version}"/>
+                <attribute name="Implementation-URL" value="http://mc4j.org/"/>
+            </manifest>
+        </jar>
+        <copy todir="dist">
+            <fileset dir="lib" includes="*.jar"/>
+        </copy>
+
+        <!-- sources jars -->
+        <jar jarfile="dist/org-mc4j-ems-${release.version}-sources.jar" basedir="src/ems"/>           
+        <jar jarfile="dist/org-mc4j-ems-impl-${release.version}-sources.jar" basedir="src/ems-impl"/>           
+        
+        <!-- javadoc jars -->
+        <jar jarfile="dist/org-mc4j-ems-${release.version}-javadoc.jar" basedir="javadocs/api"/>
+        <jar jarfile="dist/org-mc4j-ems-impl-${release.version}-javadoc.jar" basedir="javadocs/impl"/>
+        
+    </target>
+
+
+    <target name="dist" depends="jars" description="Build the EMS distribution"/>
+
+
+    <target name="install" depends="jars" description="Deploys the EMS JAR Files to the Local Maven Repo">
+        <property name="maven.repo.local" location="${user.home}/.m2/repository"/>
+        <property name="ems.artifact.dir" location="${maven.repo.local}/mc4j/org-mc4j-ems/${release.version}"/>
+        <mkdir dir="${ems.artifact.dir}"/>
+        <property name="ems-impl.artifact.dir" location="${maven.repo.local}/mc4j/org-mc4j-ems-impl/${release.version}"/>
+        <mkdir dir="${ems-impl.artifact.dir}"/>
+        
+        <copy todir="${ems.artifact.dir}">
+           <fileset dir="dist">
+              <include name="org-mc4j-ems-${release.version}.jar"/>
+              <include name="org-mc4j-ems-${release.version}-sources.jar"/>
+              <include name="org-mc4j-ems-${release.version}-javadoc.jar"/>
+           </fileset>
+        </copy>
+
+        <copy todir="${ems-impl.artifact.dir}">
+           <fileset dir="dist">
+              <include name="org-mc4j-ems-impl-${release.version}.jar"/>
+              <include name="org-mc4j-ems-impl-${release.version}-sources.jar"/>
+              <include name="org-mc4j-ems-impl-${release.version}-javadoc.jar"/>
+           </fileset>
+        </copy>
+    </target>
+
+
+    <target name="test-classloader" depends="dist">
+        <java classname="org.mc4j.ems.connection.support.classloader.NestedJarClassLoader" fork="yes">
+            <classpath>
+                <pathelement location="dist/org-mc4j-ems.jar"/>
+            </classpath>
+        </java>
+    </target>
+
+
+    <target name="test-OTHER">
+        <java classname="org.mc4j.ems.test.ConnectionTest" fork="yes">
+            <classpath>
+                <pathelement location="dist/org-mc4j-ems.jar"/>
+                <pathelement location="lib/commons-logging.jar"/>
+                <pathelement location="classes/test"/>
+                <pathelement location="C:\projects\jboss\JON_DEV_1_4\hyperic_hq\thirdparty\lib\log4j.jar"/>
+                <!--<path location="/Users/ghinkle/development/tools/jboss-4.0.2/server/default/lib/jboss-jsr77.jar"/>-->
+            </classpath>
+        </java>
+    </target>
+
+
+    <target name="run" description="Directly starts MC4J with the settings as the installer would use.">
+        <echo>Starting MC4J-EMS Test</echo>
+        <java
+                classname="org.mc4j.ems.test.LoaderTest"
+                fork="yes">
+
+            <jvmarg value="-Xms24m"/>
+            <jvmarg value="-Xmx128m"/>
+
+            <env key="JAVA_HOME" value="c:\jdk1.6.0"/>
+
+
+            <!-- Under 1.5 JRE's, this will start up the built-in jmxremoting support -->
+            <sysproperty key="com.sun.management.jmxremote.port" value="9777"/>
+            <sysproperty key="com.sun.management.jmxremote.ssl" value="false"/>
+            <sysproperty key="com.sun.management.jmxremote.authenticate" value="false"/>
+
+            <!--<jvmarg value="-Xdebug"/>
+            <jvmarg value="-Xnoagent"/>
+            <jvmarg value="-Djava.compiler=NONE"/>
+            <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005"/>-->
+
+
+            <classpath>
+                <path refid="classpath.compile"/>
+                <path location="dist/org-mc4j-ems.jar"/>
+                <pathelement location="lib/commons-logging.jar"/>
+                <pathelement location="classes/test"/>
+                <!--<pathelement location="c:\\bea\\weblogic81\\server\\lib\\weblogic.jar"/>-->
+                <!--<pathelement location="e:\\tools\\weblogic9\\weblogic90b\\server\\lib\\weblogic.jar"/>-->
+            </classpath>
+        </java>
+    </target>
+
+
+    <target name="all-test" depends="compile, jars, run" description="Compile and run the tests."/>
+
+</project>
+

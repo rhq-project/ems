@@ -1,0 +1,10 @@
+package org.mc4j.ems.connection;
+
+/**
+ * @author Greg Hinkle (ghinkle@users.sourceforge.net), Apr 4, 2005
+ * @version $Revision$($Author$ / $Date$)
+ */
+public interface MBeanRegistrationListener {
+
+    void registrationChanged(MBeanRegistrationEvent event);
+}

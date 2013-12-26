@@ -1,0 +1,15 @@
+package org.mc4j.ems.store;
+
+import java.util.List;
+
+/**
+ * @author Greg Hinkle (ghinkle@users.sourceforge.net), Apr 12, 2005
+ * @version $Revision$($Author$ / $Date$)
+ */
+public interface ValueHistory {
+    int getHistorySize();
+
+    List<Value> getValues();
+
+    void addValue(Value value);
+}
