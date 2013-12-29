@@ -109,7 +109,7 @@ public class ConnectionTest {
 //        settings.setCredentials("weblogic");
 //        settings.setPrincipal("weblogic");
 //        settings.setClassPathEntries(new File[] { new File("c:\\bea\\weblogic81\\server\\lib\\weblogic.jar")});
-        
+
 
         // Weblogic 9 - jsr 77 test
 //        settings.setConnectionName("test");
@@ -170,7 +170,7 @@ public class ConnectionTest {
                 for (EmsAttribute attribute : bean.getAttributes()) {
                     if ("HeapFreeCurrent".equals(attribute.getName())) {
                         System.out.println(bean.getBeanName().getCanonicalName() + " - " + attribute.getValue());
-                        System.out.println("Tracking history: " + attribute.getValueHistory().getHistorySize());
+//                        System.out.println("Tracking history: " + attribute.getValueHistory().getHistorySize());
                     }
                 }
             }

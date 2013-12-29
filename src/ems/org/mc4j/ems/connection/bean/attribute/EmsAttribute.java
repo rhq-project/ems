@@ -19,7 +19,7 @@ import org.mc4j.ems.store.ValueHistory;
 
 /**
  * An MBean attribute.
- * 
+ *
  * @author Greg Hinkle (ghinkle@users.sourceforge.net), Apr 4, 2005
  * @version $Revision: 620 $($Author: ianpspringer $ / $Date: 2010-08-02 21:03:05 +0200 (Mo, 02 Aug 2010) $)
  */
@@ -32,7 +32,7 @@ public interface EmsAttribute extends Comparable {
     String CONTROL_ATTRIBUTE_HISTORY_DEPTH = "Attribute.history.depth";
 
 
-    void registerAttributeChangeListener(AttributeChangeListener listener);
+//    void registerAttributeChangeListener(AttributeChangeListener listener);
 
     /**
      * Returns the locally stored value of this attribute. Does not ask the server for the current value.
@@ -67,7 +67,7 @@ public interface EmsAttribute extends Comparable {
      *
      * @return
      */
-    ValueHistory getValueHistory();
+//    ValueHistory getValueHistory();
 
     /**
      *

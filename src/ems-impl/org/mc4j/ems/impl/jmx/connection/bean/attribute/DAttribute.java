@@ -41,12 +41,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.mc4j.ems.connection.EmsException;
-import org.mc4j.ems.connection.bean.attribute.AttributeChangeEvent;
 import org.mc4j.ems.connection.bean.attribute.AttributeChangeListener;
 import org.mc4j.ems.connection.bean.attribute.EmsAttribute;
 import org.mc4j.ems.impl.jmx.connection.bean.DMBean;
-import org.mc4j.ems.store.CompleteValueHistory;
-import org.mc4j.ems.store.ValueHistory;
 
 /**
  * @author Greg Hinkle (ghinkle@users.sourceforge.net), Apr 4, 2005
@@ -64,12 +61,7 @@ public class DAttribute implements EmsAttribute {
 
     protected boolean supportedType = true;
 
-    protected Set<AttributeChangeListener> changeListeners;
-
-    protected long lastRetrieved;
     protected Object currentValue;
-
-    protected ValueHistory valueHistory;
 
     protected LinkedList<Throwable> failures;
 
@@ -84,25 +76,6 @@ public class DAttribute implements EmsAttribute {
      * Initializes internal storage settings for the value history
      */
     protected void init() {
-        if (Boolean.valueOf(getControlProperty(CONTROL_ATTRIBUTE_HISTORY,"true"))) {
-
-            String historyClass = getControlProperty(CONTROL_ATTRIBUTE_HISTORY_CLASS, null);
-
-            if (historyClass != null) {
-                try {
-                    this.valueHistory = (ValueHistory) Class.forName(historyClass).newInstance();
-
-                } catch (InstantiationException e) {
-                    throw new EmsException("Could not instantiate value history class",e);
-                } catch (IllegalAccessException e) {
-                    throw new EmsException("Could not access value history class",e);
-                } catch (ClassNotFoundException e) {
-                    throw new EmsException("Configured ValueHistory class not found",e);
-                }
-            } else {
-                this.valueHistory = new CompleteValueHistory(Integer.valueOf(getControlProperty(CONTROL_ATTRIBUTE_HISTORY_DEPTH,"1")));
-            }
-        }
     }
 
     private String getControlProperty(String property,String defaultValue) {
@@ -113,10 +86,10 @@ public class DAttribute implements EmsAttribute {
     // TODO GH: Should you be able to register for a certain frequency? and then be guaranteed that the
     // notifications won't be faster than that? Then the requests could be grouped as well
     public synchronized void registerAttributeChangeListener(AttributeChangeListener listener) {
-        if (changeListeners == null)
-            changeListeners = new HashSet<AttributeChangeListener>();
-
-        changeListeners.add(listener);
+//        if (changeListeners == null)
+//            changeListeners = new HashSet<AttributeChangeListener>();
+//
+//        changeListeners.add(listener);
     }
 
 
@@ -127,12 +100,7 @@ public class DAttribute implements EmsAttribute {
     }
 
     public int getValueSize() {
-        if (valueHistory.getHistorySize() == 0) {
-            return 0;
-        } else {
-//            return com.vladium.utils.ObjectProfiler.sizeof(getValue());
-            return 0;
-        }
+        return 0;
     }
 
     /**
@@ -162,18 +130,6 @@ public class DAttribute implements EmsAttribute {
      */
     public void alterValue(Object newValue) {
         if ((newValue != null && !newValue.equals(currentValue)) || (newValue == null && currentValue != null)) {
-
-            if (changeListeners != null && changeListeners.size() > 0) {
-                AttributeChangeEvent event = new AttributeChangeEvent(this, currentValue, newValue);
-                for (AttributeChangeListener listener : changeListeners) {
-                    listener.attributeChange(event);
-                }
-            }
-            // This old way stored attribute values if they were under a certain size
-//            if (com.vladium.utils.ObjectProfiler.sizeof(newValue) < 200)
-//            Don't do this if you're not going to bound it or have a way to disable it
-//            if (newValue instanceof Number)
-//                valueHistory.addValue(new Value(newValue, System.currentTimeMillis()));
 
             currentValue = newValue;
         }
@@ -270,9 +226,6 @@ public class DAttribute implements EmsAttribute {
         log.debug("Attribute access failure " + t.getLocalizedMessage(),t);
     }
 
-    public org.mc4j.ems.store.ValueHistory getValueHistory() {
-        return valueHistory;
-    }
 
     public String getName() {
         return info.getName();
@@ -299,7 +252,7 @@ public class DAttribute implements EmsAttribute {
         NUMERIC_TYPES.add(BigDecimal.class);
     }
 
-    private static final Map<String, Class> TYPES = new HashMap();
+    private static final Map<String, Class> TYPES = new HashMap<String,Class>();
 
     static {
         TYPES.put(Boolean.TYPE.getName(), Boolean.TYPE);
@@ -315,7 +268,7 @@ public class DAttribute implements EmsAttribute {
 
     public Class getTypeClass() {
         if (TYPES.containsKey(getType())) {
-            return (Class) TYPES.get(getType());
+            return TYPES.get(getType());
         } else {
             // TODO: Switch to using ConnectionProvider.getClassloader(), oh and implement that too
             try {
