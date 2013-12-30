@@ -22,7 +22,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -74,10 +73,9 @@ public class DMBean implements EmsBean {
     private boolean unsupportedType = false;
     protected boolean deleted = false;
 
-    private Map<String, EmsAttribute> attributes = new TreeMap<String, EmsAttribute>(String.CASE_INSENSITIVE_ORDER);
-    private Map<String, EmsOperation> operations = new TreeMap<String, EmsOperation>(String.CASE_INSENSITIVE_ORDER);
-    private Set<EmsOperation> allOperations = new TreeSet<EmsOperation>();
-    private Map<String, EmsNotification> notifications = new TreeMap<String, EmsNotification>(String.CASE_INSENSITIVE_ORDER);
+    private Map<String, EmsAttribute> attributes;// = new TreeMap<String, EmsAttribute>(String.CASE_INSENSITIVE_ORDER);
+    private Map<String, EmsOperation> operations;// = new TreeMap<String, EmsOperation>(String.CASE_INSENSITIVE_ORDER);
+    private Map<String, EmsNotification> notifications;// = new TreeMap<String, EmsNotification>(String.CASE_INSENSITIVE_ORDER);
 
     protected List<Throwable> failures;
 
@@ -136,20 +134,29 @@ public class DMBean implements EmsBean {
             try {
                 info = connectionProvider.getMBeanServer().getMBeanInfo(this.objectName);
 
-                for (MBeanAttributeInfo attributeInfo : info.getAttributes()) {
-                    DAttribute attribute = new DAttribute(attributeInfo, this);
-                    this.attributes.put(attributeInfo.getName(), attribute);
+                if (info.getAttributes().length>0) {
+
+                    this.attributes =  new TreeMap<String, EmsAttribute>(String.CASE_INSENSITIVE_ORDER);
+                    for (MBeanAttributeInfo attributeInfo : info.getAttributes()) {
+                        DAttribute attribute = new DAttribute(attributeInfo, this);
+                        this.attributes.put(attributeInfo.getName(), attribute);
+                    }
                 }
 
-                for (MBeanOperationInfo operationInfo : info.getOperations()) {
-                    DOperation operation = new DOperation(operationInfo, this);
-                    this.operations.put(operationInfo.getName(), operation);
-                    this.allOperations.add(operation);
+                if (info.getOperations().length > 0) {
+                    this.operations = new TreeMap<String, EmsOperation>(String.CASE_INSENSITIVE_ORDER);
+                    for (MBeanOperationInfo operationInfo : info.getOperations()) {
+                        DOperation operation = new DOperation(operationInfo, this);
+                        this.operations.put(operationInfo.getName(), operation);
+                    }
                 }
 
-                for (MBeanNotificationInfo notificationInfo : info.getNotifications()) {
-                    DNotification notification = new DNotification(notificationInfo, this);
-                    this.notifications.put(notificationInfo.getName(), notification);
+                if (info.getNotifications().length>0) {
+                    this.notifications = new TreeMap<String, EmsNotification>(String.CASE_INSENSITIVE_ORDER);
+                    for (MBeanNotificationInfo notificationInfo : info.getNotifications()) {
+                        DNotification notification = new DNotification(notificationInfo, this);
+                        this.notifications.put(notificationInfo.getName(), notification);
+                    }
                 }
 
             } catch (InstanceNotFoundException infe) {
@@ -174,7 +181,6 @@ public class DMBean implements EmsBean {
             info = null;
             attributes.clear();
             operations.clear();
-            allOperations.clear();
             notifications.clear();
         }
     }
@@ -344,7 +350,7 @@ public class DMBean implements EmsBean {
      */
     public EmsOperation getOperation(String operationName, Class... parameterTypes) {
         getOperations();
-        if (allOperations == null || allOperations.isEmpty()) {
+        if (operations == null || operations.isEmpty()) {
             return null;
         }
 
@@ -356,7 +362,7 @@ public class DMBean implements EmsBean {
             parameterTypeNames[i] = parameterTypes[i].getName();
         }
         EmsOperation selectedOperation = null;
-        for (EmsOperation operation : allOperations) {
+        for (EmsOperation operation : operations.values()) {
             if (!operation.getName().equals(operationName)) {
                 continue;
             }
@@ -384,7 +390,7 @@ public class DMBean implements EmsBean {
 
     public SortedSet<EmsOperation> getOperations() {
         if (info == null) loadSynchronous();
-        return new TreeSet<EmsOperation>(this.allOperations);
+        return new TreeSet<EmsOperation>(this.operations.values());
     }
 
     public EmsNotification getNotification(String name) {
