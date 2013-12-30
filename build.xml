@@ -29,7 +29,7 @@
 
     <property name="module.jar" value="org-mc4j-ems.jar"/>
 
-    <property name="release.version" value="1.3"/>
+    <property name="release.version" value="1.3.1-rhq"/>
 
 
     <target name="init" description="Initializes the MC4J-EMS build system.">
@@ -91,13 +91,13 @@
 
     </target>
 
-    
+
     <target name="clean" description="Clean">
         <delete dir="classes"/>
         <delete dir="javadocs"/>
     </target>
 
-    
+
     <target name="compile" depends="init" description="Compiles the MC4J-EMS codebase.">
         <mkdir dir="classes"/>
         <mkdir dir="classes/main"/>
@@ -127,29 +127,29 @@
     </target>
 
 
-    <target name="javadoc" depends="init" description="Generated Javadocs for MC4J-EMS classes.">        
-        <mkdir dir="javadocs/api"/>               
-        <mkdir dir="javadocs/impl"/>               
+    <target name="javadoc" depends="init" description="Generated Javadocs for MC4J-EMS classes.">
+        <mkdir dir="javadocs/api"/>
+        <mkdir dir="javadocs/impl"/>
         <javadoc packagenames="org.mc4j.ems.*"
                  excludepackagenames="org.mc4j.ems.connection.support.classloader.*"
-                 sourcepath="src/ems"           
+                 sourcepath="src/ems"
                  destdir="javadocs/api"
                  author="true"
                  version="true"
                  use="true"
                  windowtitle="EMS API">
         </javadoc>
-        <javadoc packagenames="org.mc4j.ems.*"                 
-                 sourcepath="src/ems-impl"           
+        <javadoc packagenames="org.mc4j.ems.*"
+                 sourcepath="src/ems-impl"
                  destdir="javadocs/impl"
                  author="true"
                  version="true"
                  use="true"
                  windowtitle="EMS Impl">
-        </javadoc>        
+        </javadoc>
     </target>
 
-    
+
     <target name="jars" depends="compile, javadoc" description="Builds the MC4J Module JAR Files">
         <mkdir dir="dist"/>
         <mkdir dir="build"/>
@@ -167,10 +167,10 @@
                 <attribute name="Implementation-Version" value="${release.version}"/>
                 <attribute name="Implementation-URL" value="http://mc4j.org/"/>
             </manifest>
-        </jar>        
-        <copy file="classes/main/org-mc4j-ems-impl.jar" 
+        </jar>
+        <copy file="classes/main/org-mc4j-ems-impl.jar"
               tofile="dist/org-mc4j-ems-impl-${release.version}.jar"/>
-        
+
         <jar jarfile="dist/org-mc4j-ems-${release.version}.jar" update="true" compress="false">
             <fileset dir="classes/main"/>
             <fileset dir="${basedir}" includes="lib/*.jar"/>
@@ -188,13 +188,13 @@
         </copy>
 
         <!-- sources jars -->
-        <jar jarfile="dist/org-mc4j-ems-${release.version}-sources.jar" basedir="src/ems"/>           
-        <jar jarfile="dist/org-mc4j-ems-impl-${release.version}-sources.jar" basedir="src/ems-impl"/>           
-        
+        <jar jarfile="dist/org-mc4j-ems-${release.version}-sources.jar" basedir="src/ems"/>
+        <jar jarfile="dist/org-mc4j-ems-impl-${release.version}-sources.jar" basedir="src/ems-impl"/>
+
         <!-- javadoc jars -->
         <jar jarfile="dist/org-mc4j-ems-${release.version}-javadoc.jar" basedir="javadocs/api"/>
         <jar jarfile="dist/org-mc4j-ems-impl-${release.version}-javadoc.jar" basedir="javadocs/impl"/>
-        
+
     </target>
 
 
@@ -207,7 +207,7 @@
         <mkdir dir="${ems.artifact.dir}"/>
         <property name="ems-impl.artifact.dir" location="${maven.repo.local}/mc4j/org-mc4j-ems-impl/${release.version}"/>
         <mkdir dir="${ems-impl.artifact.dir}"/>
-        
+
         <copy todir="${ems.artifact.dir}">
            <fileset dir="dist">
               <include name="org-mc4j-ems-${release.version}.jar"/>
