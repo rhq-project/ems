@@ -17,6 +17,7 @@
 package org.mc4j.ems.impl.jmx.connection.bean.operation;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.management.MBeanOperationInfo;
@@ -39,7 +40,7 @@ public class DOperation implements EmsOperation {
     protected DMBean bean;
     public static final int MAX_EXECUTION_TIME = 10000;
 
-    protected List<EmsParameter> parameters = new ArrayList<EmsParameter>();
+    protected List<EmsParameter> parameters;// = new ArrayList<EmsParameter>();
     protected Impact impact;
 
     public DOperation(MBeanOperationInfo info, DMBean bean) {
@@ -47,6 +48,9 @@ public class DOperation implements EmsOperation {
         this.bean = bean;
 
         MBeanParameterInfo[] params = info.getSignature();
+        if (params.length>0) {
+            parameters=new ArrayList<EmsParameter>(params.length);
+        }
         for (MBeanParameterInfo param : params) {
             parameters.add(new DParameter(param));
         }
@@ -75,6 +79,9 @@ public class DOperation implements EmsOperation {
     }
 
     public List<EmsParameter> getParameters() {
+        if (parameters==null) {
+            return Collections.emptyList();
+        }
         return parameters;
     }
 
@@ -190,10 +197,15 @@ public class DOperation implements EmsOperation {
 
             i = ((Integer)parameters.size()).compareTo(otherOperation.getParameters().size());
             if (i == 0) {
-                for (int j = 0; j < parameters.size();j++) {
-                    i = parameters.get(j).compareTo(otherOperation.getParameters().get(j));
-                    if (i != 0) {
-                        break;
+                if (parameters==null) {
+                    i = (otherOperation.parameters==null ? 0 : 1);
+                }
+                else {
+                    for (int j = 0; j < parameters.size();j++) {
+                        i = parameters.get(j).compareTo(otherOperation.getParameters().get(j));
+                        if (i != 0) {
+                            break;
+                        }
                     }
                 }
             }
