@@ -156,14 +156,14 @@ public class PooledConnectionTracker implements ConnectionTracker {
                             //m.put(new Integer(size),/*bean.getObjectName() + "::" +*/attribute.getName());
                             //System.out.println("\t"+attribute.getName() + " - " + attribute.getValueSize());
                             if (attribute.getName().equalsIgnoreCase("stats")) {
-                                log.debug("Stats size: " + com.vladium.utils.ObjectProfiler.sizeof(attribute.getValue()));
+//                                log.debug("Stats size: " + com.vladium.utils.ObjectProfiler.sizeof(attribute.getValue()));
                             }
                         }
                    // }
                 }
                 log.debug("Total size of " + count + " attributes: " + total);
                 // Expensive
-                log.debug("Total connection size: " + com.vladium.utils.ObjectProfiler.sizeof(connection));
+//                log.debug("Total connection size: " + com.vladium.utils.ObjectProfiler.sizeof(connection));
                 /*Iterator<Map.Entry> iter = m.entrySet().iterator();
 //                for (int i = 0;i<50;i++) {
                 for (;iter.hasNext();) {
