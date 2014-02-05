@@ -273,7 +273,7 @@
 
             <classpath>
                 <path refid="classpath.compile"/>
-                <path location="dist/org-mc4j-ems.jar"/>
+                <path location="dist/org-mc4j-ems-${release.version}.jar"/>
                 <pathelement location="lib/commons-logging.jar"/>
                 <pathelement location="classes/test"/>
                 <!--<pathelement location="c:\\bea\\weblogic81\\server\\lib\\weblogic.jar"/>-->
