@@ -161,6 +161,9 @@ public class DMBean implements EmsBean {
 
             } catch (InstanceNotFoundException infe) {
                 this.deleted = true;
+                this.attributes=null;
+                this.operations=null;
+                this.notifications=null;
 
             } catch (Exception e) {
                 unsupportedType = true;
@@ -275,6 +278,10 @@ public class DMBean implements EmsBean {
             return attributeResults;
         } catch (InstanceNotFoundException infe) {
             this.deleted = true;
+            this.attributes=null;
+            this.operations=null;
+            this.notifications=null;
+
             throw new RuntimeException("Unable to load attributes, bean not found", infe);
         } catch (Exception e) {
             // TODO: determine which exceptions to register, which to throw and what to log
