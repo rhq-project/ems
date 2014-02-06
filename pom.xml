@@ -45,6 +45,9 @@
           <target>1.6</target>
           <proc>none</proc> <!-- disable annotation processing -->
           <showWarnings>true</showWarnings>
+          <compilerArguments>
+            <bootclasspath>${env.JAVA_HOME}/jre/lib/rt.jar${path.separator}${env.JAVA_HOME}/lib/tools.jar</bootclasspath>
+          </compilerArguments>
         </configuration>
       </plugin>
       <plugin>
@@ -78,7 +81,7 @@
                   <version>3.0</version>
                 </requireMavenVersion>
                 <requireJavaVersion>
-                  <version>[1.6,1.7]</version> <!-- 1.7.x -->
+                  <version>[1.6,1.7.1)</version> <!-- 1.7.x -->
                 </requireJavaVersion>
               </rules>
             </configuration>
