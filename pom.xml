@@ -6,7 +6,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>mc4j</groupId>
   <artifactId>org-mc4j-ems</artifactId>
-  <version>1.3.1-rhq</version>
+  <version>1.3.2-rhq</version>
 
   <scm>
     <connection>https://github.com/rhq-project/ems.git</connection>
