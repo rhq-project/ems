@@ -86,7 +86,7 @@ public class ClassLoaderFactory {
 
     /**
      * Clears this factory's caches. You usually only call this when you need
-     * help cleaning out the classloaders created by this factory. 
+     * help cleaning out the classloaders created by this factory.
      */
     public static void clearCaches() {
     	jarCache.clear();
@@ -200,7 +200,7 @@ public class ClassLoaderFactory {
         Boolean useContextClassLoader = Boolean.valueOf(settings.getAdvancedProperties().getProperty(ConnectionFactory.USE_CONTEXT_CLASSLOADER, "false"));
         if (useContextClassLoader.booleanValue()) {
             ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-            URL implURL = storeImplToTemp("org-mc4j-ems-impl.jar", tempDir);        
+            URL implURL = storeImplToTemp("org-mc4j-ems-impl.jar", tempDir);
             ClassLoader loader = new URLClassLoader(new URL[] {implURL}, contextClassLoader);
             return loader;
         }
@@ -223,9 +223,11 @@ public class ClassLoaderFactory {
 
         // Now load in the implementation jar
         // URL implURL = new URL(null, "deepjar://org-mc4j-ems-impl.jar", new Handler());
+/*
         URL implURL = storeImplToTemp("org-mc4j-ems-impl.jar", tempDir);
 
         entries.add(implURL);
+*/
 
 
         if (settings.getConnectionType() instanceof LocalVMTypeDescriptor) {
@@ -271,7 +273,7 @@ public class ClassLoaderFactory {
         if (loaderReference != null) {
             loader = classLoaderCache.get(key).get();
         }
-        
+
         if (loader == null) {
 
             // WARNING: Relatively disgusting hack. hiding classes is not a good thing
