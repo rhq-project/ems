@@ -195,17 +195,20 @@ public class DOperation implements EmsOperation {
                 otherOperation.getName());
         if (i == 0) {
 
+            if (parameters==null) {
+                return otherOperation.parameters == null ? 0 : 1;
+            }
+
+            if (otherOperation.parameters == null) {
+                return -1;
+            }
+
             i = ((Integer)parameters.size()).compareTo(otherOperation.getParameters().size());
             if (i == 0) {
-                if (parameters==null) {
-                    i = (otherOperation.parameters==null ? 0 : 1);
-                }
-                else {
-                    for (int j = 0; j < parameters.size();j++) {
-                        i = parameters.get(j).compareTo(otherOperation.getParameters().get(j));
-                        if (i != 0) {
-                            break;
-                        }
+                for (int j = 0; j < parameters.size();j++) {
+                    i = parameters.get(j).compareTo(otherOperation.getParameters().get(j));
+                    if (i != 0) {
+                        break;
                     }
                 }
             }
