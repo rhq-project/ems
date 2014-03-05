@@ -223,11 +223,9 @@ public class ClassLoaderFactory {
 
         // Now load in the implementation jar
         // URL implURL = new URL(null, "deepjar://org-mc4j-ems-impl.jar", new Handler());
-/*
         URL implURL = storeImplToTemp("org-mc4j-ems-impl.jar", tempDir);
 
         entries.add(implURL);
-*/
 
 
         if (settings.getConnectionType() instanceof LocalVMTypeDescriptor) {
