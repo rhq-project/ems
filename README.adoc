@@ -1,0 +1,26 @@
+== This is the RHQ-version of mc4j-EMS.
+
+This is a fork of the EMS code base from mc4j that changes
+some behavior in a way that better matches RHQ.
+
+If you are looking for the original code you can either
+look at the base revision or go to  http://sourceforge.net/projects/mc4j/
+
+== Building
+
+You can build the bits via `ant jars` and then
+deploy the artifacts to a local maven repo via `ant install`.
+
+== maven version
+
+This fork uses the original packages from mc4j, but adds a `-rhq` designator
+to the jars like this:
+
+[source,xml]
+----
+<dependency>
+     <groupId>mc4j</groupId>
+     <artifactId>org-mc4j-ems</artifactId>
+     <version>1.3.5-rhq</version>
+</dependency>
+----
