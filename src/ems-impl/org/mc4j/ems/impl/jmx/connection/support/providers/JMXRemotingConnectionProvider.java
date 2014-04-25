@@ -67,7 +67,7 @@ public class JMXRemotingConnectionProvider extends AbstractConnectionProvider {
 
     protected void doConnect() {
         try {
-            
+
 
             ClassLoader currentLoader = Thread.currentThread().getContextClassLoader();
             Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
@@ -168,7 +168,9 @@ public class JMXRemotingConnectionProvider extends AbstractConnectionProvider {
 
     public boolean isConnected() {
         try {
-            this.mbeanServer.queryNames(new ObjectName("*:*"),null);
+            // We query for something that is unlikely to exist, as we just want to test
+            // the connection and not load a huge number of mbean names.
+            this.mbeanServer.queryNames(new ObjectName("foo:does=notexist"),null);
             return true;
         } catch (Exception e) {
             return false;
