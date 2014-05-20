@@ -199,10 +199,7 @@ public class ClassLoaderFactory {
 
         Boolean useContextClassLoader = Boolean.valueOf(settings.getAdvancedProperties().getProperty(ConnectionFactory.USE_CONTEXT_CLASSLOADER, "false"));
         if (useContextClassLoader.booleanValue()) {
-            ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-            URL implURL = storeImplToTemp("org-mc4j-ems-impl.jar", tempDir);
-            ClassLoader loader = new URLClassLoader(new URL[] {implURL}, contextClassLoader);
-            return loader;
+            return Thread.currentThread().getContextClassLoader();
         }
 
         List<URL> entries = new ArrayList<URL>();
@@ -220,13 +217,6 @@ public class ClassLoaderFactory {
                 }
             }
         }
-
-        // Now load in the implementation jar
-        // URL implURL = new URL(null, "deepjar://org-mc4j-ems-impl.jar", new Handler());
-        URL implURL = storeImplToTemp("org-mc4j-ems-impl.jar", tempDir);
-
-        entries.add(implURL);
-
 
         if (settings.getConnectionType() instanceof LocalVMTypeDescriptor) {
             // Need tools.jar if its not already loaded
@@ -258,6 +248,10 @@ public class ClassLoaderFactory {
             Double.parseDouble(System.getProperty("java.version").substring(0, 3)) < 1.5) {
             entries.add(storeImplToTemp("lib/jsr160-includes/mx4j.jar", tempDir));
             entries.add(storeImplToTemp("lib/jsr160-includes/mx4j-remote.jar", tempDir));
+        }
+
+        if (entries.isEmpty()) {
+            return ClassLoaderFactory.class.getClassLoader();
         }
 
         // TODO: Check if file exists, log warning if not
