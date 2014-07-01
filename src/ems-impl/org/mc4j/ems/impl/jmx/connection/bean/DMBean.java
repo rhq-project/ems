@@ -182,9 +182,9 @@ public class DMBean implements EmsBean {
         if (loaded) {
             loaded = false;
             info = null;
-            attributes.clear();
-            operations.clear();
-            notifications.clear();
+            attributes=null;
+            operations=null;
+            notifications=null;
         }
     }
 

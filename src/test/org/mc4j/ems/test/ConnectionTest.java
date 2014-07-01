@@ -70,6 +70,28 @@ public class ConnectionTest {
         }
 
         this.connection = connection;
+
+        connection.unload();
+
+        connection.loadSynchronous(true);
+
+        SortedSet<EmsBean> beans2 = connection.getBeans();
+
+        if (!(beans.size() == beans2.size())) {
+            throw new AssertionError("Bean count does not match ");
+        }
+
+        connection.close();
+
+        connection = factory.connect(settings);
+
+        connection.loadSynchronous(true);
+
+        SortedSet<EmsBean> beans3 = connection.getBeans();
+
+        if (!(beans.size() == beans3.size())) {
+            throw new AssertionError("Bean count does not match ");
+        }
     }
 
     private ConnectionSettings getSettings() {
