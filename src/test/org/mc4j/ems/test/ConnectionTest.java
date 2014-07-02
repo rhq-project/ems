@@ -16,6 +16,7 @@
 
 package org.mc4j.ems.test;
 
+import java.net.URL;
 import java.util.SortedSet;
 
 import javax.management.InstanceNotFoundException;
@@ -25,6 +26,7 @@ import org.mc4j.ems.connection.ConnectionFactory;
 import org.mc4j.ems.connection.EmsConnection;
 import org.mc4j.ems.connection.bean.EmsBean;
 import org.mc4j.ems.connection.bean.attribute.EmsAttribute;
+import org.mc4j.ems.connection.bean.operation.EmsOperation;
 import org.mc4j.ems.connection.settings.ConnectionSettings;
 import org.mc4j.ems.connection.support.metadata.JBossConnectionTypeDescriptor;
 
@@ -71,8 +73,8 @@ public class ConnectionTest {
 
         this.connection = connection;
 
+        System.out.println(".. unloading connection and reloading ..");
         connection.unload();
-
         connection.loadSynchronous(true);
 
         SortedSet<EmsBean> beans2 = connection.getBeans();
@@ -81,6 +83,7 @@ public class ConnectionTest {
             throw new AssertionError("Bean count does not match ");
         }
 
+        System.out.println(".. closing connection and reopening ..");
         connection.close();
 
         connection = factory.connect(settings);
@@ -92,6 +95,84 @@ public class ConnectionTest {
         if (!(beans.size() == beans3.size())) {
             throw new AssertionError("Bean count does not match ");
         }
+
+        testSomeOperations(connection);
+        testSomeAttributes(connection);
+
+
+    }
+
+    private void testSomeAttributes(EmsConnection connection) {
+        EmsBean emsBean = connection.getBean("jboss.system:service=MainDeployer");
+        assert emsBean!=null : "No main deployer, jboss.system:service=MainDeployer, found";
+
+        testStateAttribute(emsBean);
+        testUnknownAttribute(emsBean);
+
+        // Unload the MBean and try again
+        System.out.println(".. unloading bean ..");
+        emsBean.unload();
+        testStateAttribute(emsBean);
+        testUnknownAttribute(emsBean);
+
+
+    }
+
+    private void testUnknownAttribute(EmsBean emsBean) {
+        EmsAttribute foo = emsBean.getAttribute("-does-not-exist-");
+        assert foo == null : "Attribute should not have existed, but does";
+        // check same again because of caching
+        foo = emsBean.getAttribute("-does-not-exist-");
+        assert foo == null : "Attribute should not have existed, but does";
+    }
+
+    private void testStateAttribute(EmsBean emsBean) {
+        EmsAttribute state = emsBean.getAttribute("state");
+        assert state!=null : "Did not find attribute 'state'";
+        assert state.isNumericType() : "State is not numeric, but should be";
+        assert !state.isWritable() : "State should not be writeable";
+        System.out.println(".. state looks ok ..");
+        try {
+            state.setValue(42);
+            throw new IllegalStateException("Should not end up here");
+        } catch (Exception e) {
+            System.out.println(".. state is rightfully not modified ..");
+        }
+    }
+
+    private void testSomeOperations(EmsConnection connection) {
+        EmsBean mainDeployer = connection.getBean("jboss.system:service=MainDeployer");
+        assert mainDeployer!=null : "No main deployer, jboss.system:service=MainDeployer, found";
+
+        testFindMultivariantOp(mainDeployer);
+        testRunOperation(mainDeployer);
+
+        System.out.println(".. unloading bean ..");
+        mainDeployer.unload();
+
+        testFindMultivariantOp(mainDeployer);
+        testRunOperation(mainDeployer);
+
+    }
+
+    private void testRunOperation(EmsBean mainDeployer) {
+        EmsOperation op;
+        op = mainDeployer.getOperation("isDeployed",String.class);
+        assert op != null : "isDeployed(String) not found";
+        System.out.println(".. found isDeployed(String) ..");
+        Object result = op.invoke("file:///foo.war");  // We pass a string, but AS expects an url
+        assert result != null : "invoke isDeployed(foo.war) failed ";
+        assert result instanceof Boolean : "Result was not bool";
+        System.out.println(".. isDeployed returned " + (Boolean)result);
+    }
+
+    private void testFindMultivariantOp(EmsBean mainDeployer) {
+        EmsOperation op = mainDeployer.getOperation("deploy",URL.class);
+        assert op != null: "deploy(URL) not found";
+        System.out.println(".. found deploy(URL) ..");
+        op = mainDeployer.getOperation("deploy", String.class);
+        assert op != null : "deploy(String) not found";
+        System.out.println(".. found deploy(String) ..");
     }
 
     private ConnectionSettings getSettings() {
@@ -107,8 +188,10 @@ public class ConnectionTest {
         settings.setConnectionName("JBoss Test");
         settings.setServerUrl("jnp://localhost:1099");
         //settings.setLibraryURI("/Users/ghinkle/development/tools/jboss-4.0.3SP1-installer");
-        settings.setLibraryURI("C:\\tools\\jboss\\jboss-4.2.0.CR1");
-        //settings.setPrincipal("admin"); settings.setCredentials("admin");
+        //settings.setLibraryURI("C:\\tools\\jboss\\jboss-4.2.0.CR1");
+        settings.setLibraryURI("/devel/jboss-eap-4.3/jboss-as");
+        settings.setPrincipal("admin");
+        settings.setCredentials("nimda");
 
 
 

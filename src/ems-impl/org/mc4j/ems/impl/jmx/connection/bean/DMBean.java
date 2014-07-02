@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -74,8 +75,8 @@ public class DMBean implements EmsBean {
     protected boolean deleted = false;
 
     private Map<String, EmsAttribute> attributes;// = new TreeMap<String, EmsAttribute>(String.CASE_INSENSITIVE_ORDER);
-    private Map<String, EmsOperation> operations;// = new TreeMap<String, EmsOperation>(String.CASE_INSENSITIVE_ORDER);
-    private Map<String, EmsNotification> notifications;// = new TreeMap<String, EmsNotification>(String.CASE_INSENSITIVE_ORDER);
+    private Set<EmsOperation> allOperations;//  = new TreeSet<EmsOperation>();
+    private Map<String, EmsNotification> notifications = new TreeMap<String, EmsNotification>(String.CASE_INSENSITIVE_ORDER);
 
     protected List<Throwable> failures;
 
@@ -144,10 +145,10 @@ public class DMBean implements EmsBean {
                 }
 
                 if (info.getOperations().length > 0) {
-                    this.operations = new TreeMap<String, EmsOperation>(String.CASE_INSENSITIVE_ORDER);
+                    this.allOperations = new TreeSet<EmsOperation>();
                     for (MBeanOperationInfo operationInfo : info.getOperations()) {
                         DOperation operation = new DOperation(operationInfo, this);
-                        this.operations.put(operationInfo.getName(), operation);
+                        this.allOperations.add(operation);
                     }
                 }
 
@@ -162,7 +163,7 @@ public class DMBean implements EmsBean {
             } catch (InstanceNotFoundException infe) {
                 this.deleted = true;
                 this.attributes=null;
-                this.operations=null;
+                this.allOperations=null;
                 this.notifications=null;
 
             } catch (Exception e) {
@@ -183,7 +184,7 @@ public class DMBean implements EmsBean {
             loaded = false;
             info = null;
             attributes=null;
-            operations=null;
+            allOperations=null;
             notifications=null;
         }
     }
@@ -196,8 +197,13 @@ public class DMBean implements EmsBean {
     }
 
     public EmsAttribute getAttribute(String name) {
-        if (!loaded)
+        if (!loaded) {
             loadSynchronous();
+        }
+
+        if (this.attributes==null) {
+            return new DUnkownAttribute(this,name);
+        }
 
         EmsAttribute attribute = this.attributes.get(name);
         if (attribute == null && unsupportedType) {
@@ -209,17 +215,25 @@ public class DMBean implements EmsBean {
     }
 
     public SortedSet<EmsAttribute> getAttributes() {
-        if (!loaded)
+        if (!loaded) {
             loadSynchronous();
-        return new TreeSet<EmsAttribute>(this.attributes.values());
+        }
+        TreeSet<EmsAttribute> emsAttributes;
+        if (this.attributes==null) {
+            emsAttributes = new TreeSet<EmsAttribute>();
+        } else {
+            emsAttributes = new TreeSet<EmsAttribute>(this.attributes.values());
+        }
+        return emsAttributes;
     }
 
     protected boolean hasUnsupportedType = false;
 
 
     public List<EmsAttribute> refreshAttributes() {
-        if (info == null)
+        if (info == null) {
             loadSynchronous();
+        }
 
         MBeanAttributeInfo[] infos = new MBeanAttributeInfo[0];
         try {
@@ -279,7 +293,7 @@ public class DMBean implements EmsBean {
         } catch (InstanceNotFoundException infe) {
             this.deleted = true;
             this.attributes=null;
-            this.operations=null;
+            this.allOperations=null;
             this.notifications=null;
 
             throw new RuntimeException("Unable to load attributes, bean not found", infe);
@@ -343,8 +357,15 @@ public class DMBean implements EmsBean {
     }
 
     public EmsOperation getOperation(String name) {
-        if (info == null) loadSynchronous();
-        return this.operations.get(name);
+        if (info == null) {
+            loadSynchronous();
+        }
+        for (EmsOperation operation : allOperations) {
+            if (operation.getName().equals(name)) {
+                return operation;
+            }
+        }
+        return null;
     }
 
     /**
@@ -357,7 +378,7 @@ public class DMBean implements EmsBean {
      */
     public EmsOperation getOperation(String operationName, Class... parameterTypes) {
         getOperations();
-        if (operations == null || operations.isEmpty()) {
+        if (allOperations == null || allOperations.isEmpty()) {
             return null;
         }
 
@@ -369,7 +390,7 @@ public class DMBean implements EmsBean {
             parameterTypeNames[i] = parameterTypes[i].getName();
         }
         EmsOperation selectedOperation = null;
-        for (EmsOperation operation : operations.values()) {
+        for (EmsOperation operation : allOperations) {
             if (!operation.getName().equals(operationName)) {
                 continue;
             }
@@ -396,17 +417,23 @@ public class DMBean implements EmsBean {
 
 
     public SortedSet<EmsOperation> getOperations() {
-        if (info == null) loadSynchronous();
-        return new TreeSet<EmsOperation>(this.operations.values());
+        if (info == null) {
+            loadSynchronous();
+        }
+        return new TreeSet<EmsOperation>(this.allOperations);
     }
 
     public EmsNotification getNotification(String name) {
-        if (info == null) loadSynchronous();
+        if (info == null) {
+            loadSynchronous();
+        }
         return this.notifications.get(name);
     }
 
     public SortedSet<EmsNotification> getNotifications() {
-        if (info == null) loadSynchronous();
+        if (info == null) {
+            loadSynchronous();
+        }
         return new TreeSet<EmsNotification>(this.notifications.values());
     }
 
@@ -423,7 +450,9 @@ public class DMBean implements EmsBean {
     }
 
     protected MBeanInfo getMBeanInfo() {
-        if (info == null) loadSynchronous();
+        if (info == null) {
+            loadSynchronous();
+        }
         return info;
     }
 

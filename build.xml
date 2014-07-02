@@ -229,21 +229,24 @@
     <target name="test-classloader" depends="dist">
         <java classname="org.mc4j.ems.connection.support.classloader.NestedJarClassLoader" fork="yes">
             <classpath>
-                <pathelement location="dist/org-mc4j-ems.jar"/>
+              <path location="dist/org-mc4j-ems-${release.version}.jar"/>
             </classpath>
         </java>
     </target>
 
 
-    <target name="test-OTHER">
+    <target name="test-AS4">
+      <!-- this test requires a running JBoss AS 4 kind of server -->
+      <!-- server is expected to live in /devel/jboss-eap-4.3/jboss-as -->
+      <!-- and having admin:nimda as credentials to connect to JMX -->
+      <!-- todo: pull those settings out into <arg> -->
         <java classname="org.mc4j.ems.test.ConnectionTest" fork="yes">
             <classpath>
-                <pathelement location="dist/org-mc4j-ems.jar"/>
-                <pathelement location="lib/commons-logging.jar"/>
+                <path location="dist/org-mc4j-ems-${release.version}.jar"/>
+                <pathelement location="lib/commons-logging-1.1.0.jboss.jar"/>
                 <pathelement location="classes/test"/>
-                <pathelement location="C:\projects\jboss\JON_DEV_1_4\hyperic_hq\thirdparty\lib\log4j.jar"/>
-                <!--<path location="/Users/ghinkle/development/tools/jboss-4.0.2/server/default/lib/jboss-jsr77.jar"/>-->
             </classpath>
+          <jvmarg value="-ea"/>
         </java>
     </target>
 
@@ -283,7 +286,7 @@
     </target>
 
 
-    <target name="all-test" depends="compile, jars, run" description="Compile and run the tests."/>
+    <target name="all-test" depends="compile, jars, run, test-AS4" description="Compile and run the tests."/>
 
 </project>
 
