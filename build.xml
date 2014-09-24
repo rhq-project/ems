@@ -197,6 +197,32 @@
 
     <target name="dist" depends="jars" description="Build the EMS distribution"/>
 
+    <target name="maven-deploy-file">
+       <fail message="Set -Durl to your repository URL" unless="url"/>
+       <fail message="Set -DrepositoryId to your repository ID" unless="repositoryId"/>
+       <exec executable="mvn">
+            <arg value="deploy:deploy-file"/>
+            <arg value="-DrepositoryId=${repositoryId}"/>
+            <arg value="-DgroupId=em"/>
+            <arg value="-Dfile=${file}"/>
+            <arg value="-DgeneratePom=true"/>
+            <arg value="-Durl=${url}"/>
+            <arg value="-DgroupId=mc4j"/>
+            <arg value="-Dversion=${release.version}"/>
+            <arg value="-DartifactId=${artifactId}"/>
+       </exec>
+    </target>
+
+    <target name="maven-deploy" description="Deploys the EMS JAR Files to a Remote Maven Repo">
+        <antcall target="maven-deploy-file">
+            <param name="artifactId" value="org-mc4j-ems"/>
+            <param name="file" value="dist/org-mc4j-ems-${release.version}.jar"/>
+        </antcall>
+        <antcall target="maven-deploy-file">
+            <param name="artifactId" value="org-mc4j-ems-impl"/>
+            <param name="file" value="dist/org-mc4j-ems-impl-${release.version}.jar"/>
+        </antcall>
+    </target>
 
     <target name="install" depends="jars" description="Deploys the EMS JAR Files to the Local Maven Repo">
         <property name="maven.repo.local" location="${user.home}/.m2/repository"/>
