@@ -145,7 +145,6 @@
 
         <jar jarfile="dist/org-mc4j-ems-${release.version}.jar" update="true" compress="true">
             <fileset dir="classes/main"/>
-            <fileset dir="${basedir}" includes="lib/jsr160-includes/*.jar"/>
 
             <manifest>
                 <attribute name="Implementation-Title" value="MC4J-EMS"/>

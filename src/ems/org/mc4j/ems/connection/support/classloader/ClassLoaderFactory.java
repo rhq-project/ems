@@ -241,15 +241,6 @@ public class ClassLoaderFactory {
             }
         }
 
-
-        // Add internal support jars for JSR160 on < jdk5
-        if ((settings.getConnectionType() instanceof JSR160ConnectionTypeDescriptor) &&
-            settings.getConnectionType().getConnectionClasspathEntries() == null &&
-            Double.parseDouble(System.getProperty("java.version").substring(0, 3)) < 1.5) {
-            entries.add(storeImplToTemp("lib/jsr160-includes/mx4j.jar", tempDir));
-            entries.add(storeImplToTemp("lib/jsr160-includes/mx4j-remote.jar", tempDir));
-        }
-
         if (entries.isEmpty()) {
             return ClassLoaderFactory.class.getClassLoader();
         }
