@@ -101,21 +101,14 @@
     <target name="compile" depends="init" description="Compiles the MC4J-EMS codebase.">
         <mkdir dir="classes"/>
         <mkdir dir="classes/main"/>
-        <mkdir dir="classes/impl"/>
         <mkdir dir="classes/test"/>
         <javac srcdir="src/ems" destdir="classes/main" debug="true" source="${compile.source}"
                target="${compile.target}">
             <classpath>
                 <path refid="classpath.compile"/>
-            </classpath>
-            <exclude name="**/DeepClassLoaderOrig*"/>
-        </javac>
-        <javac srcdir="src/ems-impl" destdir="classes/impl" debug="true" source="${compile.source}"
-               target="${compile.target}">
-            <classpath>
-                <path refid="classpath.compile"/>
                 <pathelement location="classes/main"/>
             </classpath>
+            <exclude name="**/DeepClassLoaderOrig*"/>
         </javac>
         <javac srcdir="src/test" destdir="classes/test" debug="true" source="${compile.source}" target="1.5">
             <classpath>
@@ -129,7 +122,6 @@
 
     <target name="javadoc" depends="init" description="Generated Javadocs for MC4J-EMS classes.">
         <mkdir dir="javadocs/api"/>
-        <mkdir dir="javadocs/impl"/>
         <javadoc packagenames="org.mc4j.ems.*"
                  excludepackagenames="org.mc4j.ems.connection.support.classloader.*"
                  sourcepath="src/ems"
@@ -138,14 +130,6 @@
                  version="true"
                  use="true"
                  windowtitle="EMS API">
-        </javadoc>
-        <javadoc packagenames="org.mc4j.ems.*"
-                 sourcepath="src/ems-impl"
-                 destdir="javadocs/impl"
-                 author="true"
-                 version="true"
-                 use="true"
-                 windowtitle="EMS Impl">
         </javadoc>
     </target>
 
@@ -158,16 +142,6 @@
                 <include name="*.jar"/>
             </fileset>
         </delete>
-
-        <jar jarfile="dist/org-mc4j-ems-impl-${release.version}.jar" update="true" compress="true">
-            <fileset dir="classes/impl" includes="org/mc4j/ems/impl/**"/>
-            <manifest>
-                <attribute name="Implementation-Title" value="MC4J-EMS"/>
-                <attribute name="Specification-Version" value="${release.version}"/>
-                <attribute name="Implementation-Version" value="${release.version}"/>
-                <attribute name="Implementation-URL" value="http://mc4j.org/"/>
-            </manifest>
-        </jar>
 
         <jar jarfile="dist/org-mc4j-ems-${release.version}.jar" update="true" compress="true">
             <fileset dir="classes/main"/>
@@ -186,11 +160,9 @@
 
         <!-- sources jars -->
         <jar jarfile="dist/org-mc4j-ems-${release.version}-sources.jar" basedir="src/ems"/>
-        <jar jarfile="dist/org-mc4j-ems-impl-${release.version}-sources.jar" basedir="src/ems-impl"/>
 
         <!-- javadoc jars -->
         <jar jarfile="dist/org-mc4j-ems-${release.version}-javadoc.jar" basedir="javadocs/api"/>
-        <jar jarfile="dist/org-mc4j-ems-impl-${release.version}-javadoc.jar" basedir="javadocs/impl"/>
 
     </target>
 
@@ -218,18 +190,12 @@
             <param name="artifactId" value="org-mc4j-ems"/>
             <param name="file" value="dist/org-mc4j-ems-${release.version}.jar"/>
         </antcall>
-        <antcall target="maven-deploy-file">
-            <param name="artifactId" value="org-mc4j-ems-impl"/>
-            <param name="file" value="dist/org-mc4j-ems-impl-${release.version}.jar"/>
-        </antcall>
     </target>
 
     <target name="install" depends="jars" description="Deploys the EMS JAR Files to the Local Maven Repo">
         <property name="maven.repo.local" location="${user.home}/.m2/repository"/>
         <property name="ems.artifact.dir" location="${maven.repo.local}/mc4j/org-mc4j-ems/${release.version}"/>
         <mkdir dir="${ems.artifact.dir}"/>
-        <property name="ems-impl.artifact.dir" location="${maven.repo.local}/mc4j/org-mc4j-ems-impl/${release.version}"/>
-        <mkdir dir="${ems-impl.artifact.dir}"/>
 
         <copy todir="${ems.artifact.dir}">
            <fileset dir="dist">
@@ -239,13 +205,6 @@
            </fileset>
         </copy>
 
-        <copy todir="${ems-impl.artifact.dir}">
-           <fileset dir="dist">
-              <include name="org-mc4j-ems-impl-${release.version}.jar"/>
-              <include name="org-mc4j-ems-impl-${release.version}-sources.jar"/>
-              <include name="org-mc4j-ems-impl-${release.version}-javadoc.jar"/>
-           </fileset>
-        </copy>
     </target>
 
 
@@ -300,7 +259,6 @@
             <classpath>
                 <path refid="classpath.compile"/>
                 <path location="dist/org-mc4j-ems-${release.version}.jar"/>
-                <path location="dist/org-mc4j-ems-impl-${release.version}.jar"/>
                 <pathelement location="lib/commons-logging.jar"/>
                 <pathelement location="classes/test"/>
                 <!--<pathelement location="c:\\bea\\weblogic81\\server\\lib\\weblogic.jar"/>-->
