@@ -76,7 +76,7 @@ public class JMXRemotingConnectionProvider extends AbstractConnectionProvider {
             // Create an RMI connector client
             JMXServiceURL url = new JMXServiceURL(this.connectionSettings.getServerUrl());
 
-            Hashtable env = new Hashtable();
+            Hashtable<String, Object> env = new Hashtable<String, Object>();
 
             if ((connectionSettings.getInitialContextName() != null) &&
                 (connectionSettings.getInitialContextName().trim().length() > 0)) {
@@ -120,8 +120,7 @@ public class JMXRemotingConnectionProvider extends AbstractConnectionProvider {
                 Set<Map.Entry<Object,Object>> entries = connectionSettings.getAdvancedProperties().entrySet();
                 for (Map.Entry entry : entries) {
                     String key = (String) entry.getKey();
-                    String value = (String) entry.getValue();
-
+                    Object value = entry.getValue();
                     env.put(key, value);
                 }
             }

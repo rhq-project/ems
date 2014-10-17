@@ -11,6 +11,9 @@ look at the base revision or go to  http://sourceforge.net/projects/mc4j/
 You can build the bits via `ant jars` and then
 deploy the artifacts to a local maven repo via `ant install`.
 
+You can deploy to a remote repository using
+`ant maven-deploy -Durl=https://.../ -DrepositoryId=...`
+
 == maven version
 
 This fork uses the original packages from mc4j, but adds a `-rhq` designator
